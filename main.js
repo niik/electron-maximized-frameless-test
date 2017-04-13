@@ -35,7 +35,6 @@ function createWindow() {
   })
 
   function sendWindowStateEvent(state) {
-    process.stdout.write(`${state}\n`)
     win.webContents.send('window-state-updated')
   }
 
