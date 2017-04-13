@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      body {
+        outline: 1px dotted red;
+        outline-offset: -1px;
+      }
+
+      #fake-title-bar {
+        height: 29px;
+        background: black;
+        color: white;
+        -webkit-app-region: drag;
+        text-align: right;
+
+        outline: 1px dotted yellow;
+        outline-offset: -1px;
+      }
+
+      #fake-title-bar button {
+        -webkit-app-region: no-drag;
+        -webkit-appearance: none;
+        height: 29px;
+        width: 29px;
+        background: transparent;
+        border: none;
+        color: white;
+      }
+
+      #content {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id='fake-title-bar'>
+      <button id='minimize'>🗕</button>
+      <button id='maximize'>🗖</button>
+      <button id='restore'>🗗</button>
+      <button id='close'>🗙</button>
+    </div>
+
+    <div id='content'>
+      <p>
+        We are using node <span id='node-version'></span>
+        Chrome <span id='chrome-version'></span>
+        and Electron <span id='electron-version'></span>
+      </p>
+      <p>
+        Window size: <span id='window-size'></span>, position: <span id='window-position'></span>
+      </p>
+    </div>
+
+    <script type='text/javascript'>
+
+      document.getElementById('node-version').textContent = process.versions.node
+      document.getElementById('chrome-version').textContent = process.versions.chrome
+      document.getElementById('electron-version').textContent = process.versions.electron
+
+      const minimizeButton = document.getElementById('minimize')
+      const maximizeButton = document.getElementById('maximize')
+      const restoreButton = document.getElementById('restore')
+      const closeButton = document.getElementById('close')
+
+      function updateWindowState() {
+        console.log('updateWindowState', currentWindow.isMaximized())
+        if (currentWindow.isMaximized()) {
+          maximizeButton.style.display = 'none'
+          restoreButton.style.display = ''
+        } else {
+          maximizeButton.style.display = ''
+          restoreButton.style.display = 'none'
+        }
+      }
+
+      function updateSize() {
+        document.getElementById('window-size').textContent = JSON.stringify(currentWindow.getSize())
+      }
+
+      function updatePosition() {
+        document.getElementById('window-position').textContent = JSON.stringify(currentWindow.getPosition())
+      }
+
+      const { remote, ipcRenderer } = require('electron')
+      const currentWindow = remote.getCurrentWindow()
+
+      updateWindowState()
+      updateSize()
+      updatePosition()
+
+      ipcRenderer.on('window-state-updated', updateWindowState)
+      ipcRenderer.on('resize', updateSize)
+      ipcRenderer.on('move', updatePosition)
+
+      minimizeButton.addEventListener('click', function() {
+        currentWindow.minimize()
+      })
+
+      maximizeButton.addEventListener('click', function() {
+        currentWindow.maximize()
+      })
+
+      restoreButton.addEventListener('click', function() {
+        currentWindow.unmaximize()
+      })
+
+      closeButton.addEventListener('click', function() {
+        currentWindow.close()
+      })
+    </script>
+  </body>
+</html>
